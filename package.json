@@ -1,5 +1,5 @@
 {
-  "name": "npm-universal-router",
+  "name": "@types/universal-router",
   "version": "0.0.0",
   "description": "TypeScript's type definition for universal-router",
   "main": "index.js",
