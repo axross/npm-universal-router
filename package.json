@@ -1,0 +1,19 @@
+{
+  "name": "npm-universal-router",
+  "version": "0.0.0",
+  "description": "TypeScript's type definition for universal-router",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/axross/npm-universal-router.git"
+  },
+  "author": "Kohei Asai <me@axross.io>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/axross/npm-universal-router/issues"
+  },
+  "homepage": "https://github.com/axross/npm-universal-router#readme"
+}
