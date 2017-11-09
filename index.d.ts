@@ -1,80 +1,59 @@
 import * as pathToRegexp from 'path-to-regexp';
 
 interface Params {
-  [key: string]: any
+  [key: string]: any;
 }
 
 interface BaseContext {
   [key: string]: any;
 }
 
-type RouteResult<Result> = Result | Promise<Result>;
-
 type ActionFunctionContext<Result, Context> = Context & {
-  next: () => RouteResult<Result>;
+  next: () => Result | Promise<Result>;
 };
 
-type ActionFunction<Result, Context> = (
-  context: ActionFunctionContext<Result, Context>,
-  params: Params,
-) => RouteResult<Result>;
-
-export interface Route<Result, Context extends BaseContext = BaseContext> {
+export interface Route<Result, Context> {
   path: string;
-  action: ActionFunction<Result, Context>;
+  action: (context: ActionFunctionContext<Result, Context>, params: Params) => Result | Promise<Result>;
   name?: string;
-  parent?: Route<Result> | null;
-  children?: Route<Result>[];
+  parent?: Route<Result, Context> | null;
+  children?: Route<Result, Context>[];
 }
 
-export type Routes<Result, Context> = Route<Result, Context>[]
-
-type MatchPath<Result> = (
-  route: Route<Result>,
-  pathname: string,
-  parentKeys: string[],
-  parentParams: { [key: string]: any },
-) => any;
-
-type MatchRoute<Result> = (
-  route: Route<Result>,
-  baseUrl: string,
-  pathname: string,
-  parentKeys: string[],
-  parentParams: { [key: string]: any },
-) => any;
-
-type ResolveRoute<Result> = (context: BaseContext, params: Params) => Result | null;
+type ResolveRoute<Result, Context> = (context: Context, params: Params) => Result | null;
 
 interface ConstructorOptions<Context, Result> {
   context?: Context;
   baseUrl?: string;
-  resolveRoute?: ResolveRoute<Result>;
+  resolveRoute?: ResolveRoute<Result, Context>;
 }
 
-interface InstanceContext<Result, Context> extends BaseContext {
-  router: UniversalRouter<Result, Context>
-}
-
-interface ResolverContext extends BaseContext {
-  pathname: string;
-}
-
-declare class UniversalRouter<Result, Context> {
+declare class UniversalRouter<Result, Context extends BaseContext> {
   baseUrl: string;
-  resolveRoute: ResolveRoute<Result>;
-  context: InstanceContext<Result, Context>;
-  root: Route<Result>;
+  resolveRoute: ResolveRoute<Result, Context>;
+  context: Context & { router: UniversalRouter<Result, Context> };
+  root: Route<Result, Context>;
 
-  constructor(routes: Routes<Result, Context>, options?: ConstructorOptions<Context, Result>);
+  constructor(routes: Route<Result, Context>[], options?: ConstructorOptions<Context, Result>);
 
   resolve(pathname: string): Promise<Result>;
-  resolve(context: ResolverContext & Context): Promise<Result>;
+  resolve(context: Context & { pathname: string }): Promise<Result>;
 
   static pathToRegexp: typeof pathToRegexp;
-  static matchPath: MatchPath<any>;
-  static matchRoute: MatchRoute<any>;
-  static resolveRoute: ResolveRoute<any>;
+  static matchPath: <Result = any, Context = any>(
+    route: Route<Result, Context>,
+    pathname: string,
+    parentKeys: string[],
+    parentParams: { [key: string]: any },
+  ) => any;
+  static matchRoute: <Result = any, Context = any>(
+    route: Route<Result, Context>,
+    baseUrl: string,
+    pathname: string,
+    parentKeys: string[],
+    parentParams: { [key: string]: any },
+  ) => any;
+  static resolveRoute: <Result = any>(context: BaseContext, params: Params) => Result | null;
 }
 
 export default UniversalRouter;
